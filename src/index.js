@@ -157,6 +157,7 @@ const manageDOM = (() => {
 
         let titleInput = document.createElement('input')
         form.appendChild(titleInput)
+        titleInput.focus()
         titleInput.setAttribute('type', 'text')
         titleInput.setAttribute('id', 'title-input')
         titleInput.required = true
@@ -276,6 +277,7 @@ const manageDOM = (() => {
 
         let nameInput = document.createElement('input')
         projectForm.appendChild(nameInput)
+        nameInput.focus()
         nameInput.setAttribute('id', 'project-name')
         nameInput.setAttribute('type', 'text')
         nameInput.required = true
@@ -390,9 +392,39 @@ const manageDOM = (() => {
         for(let i = 0; i < project.projectTasks.length; i++) {
             let task = document.createElement('div')
             tasksContent.appendChild(task)
-            task.textContent = `${i + 1}. ${project.projectTasks[i].getTaskName()}, ${project.projectTasks[i].getTaskDueDate()}, ${project.projectTasks[i].getTaskPriority()}, ${project.projectTasks[i].getTaskDescription()}` 
+            task.classList.add('task')
+            let taskText = document.createElement('div')
+            task.appendChild(taskText)
+            taskText.classList.add('task-text')
+            taskText.textContent = `${i + 1}. ${project.projectTasks[i].getTaskName()}, ${project.projectTasks[i].getTaskDueDate()}, ${project.projectTasks[i].getTaskPriority()}` 
+            let collapsibleBtn = document.createElement('button')
+            taskText.appendChild(collapsibleBtn)
+            collapsibleBtn.setAttribute('type', 'button')
+            collapsibleBtn.classList.add('collapse')
+            let collapsibleContent = document.createElement('div')
+            task.appendChild(collapsibleContent)
+            collapsibleContent.textContent = project.projectTasks[i].getTaskDescription()
+            collapsibleContent.classList.add('collapse-content')
         }
+        makeCollapsibleContent()
     } 
+
+    const makeCollapsibleContent = () => {
+        let collapsible = document.getElementsByClassName('collapse')
+        for(let i = 0; i < collapsible.length; i++) {
+            collapsible[i].addEventListener('click', () => {
+                collapsible[i].classList.toggle('active')
+                let taskText = document.getElementsByClassName('task-text')
+                let content = taskText[i].nextElementSibling
+                if(collapsible[i].classList.contains('active')) {
+                    content.style.display = 'block'
+                } else {
+                    content.style.display = 'none'
+                }
+            })
+        }
+
+    }
 
     return {setEventListeners, addProjectToSelector}
 })()

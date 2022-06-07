@@ -60,3 +60,44 @@ header {
     background-color: blue;
     left: 300px;
 }
+
+.task-text {
+    display: flex;
+    width: 100%;
+}
+
+.collapse {
+    background-color: #777;
+    color: white;
+    cursor: pointer;
+    padding: 18px;
+    border: none;
+    outline: none;
+    font-size: 15px;
+    }
+
+.active, 
+.collapse:hover {
+    background-color: #555;
+}
+
+.collapse:after {
+    content: '\002B';
+    color: white;
+    font-weight: bold;
+    float: right;
+    margin-left: 5px;
+}
+
+.active:after {
+    content: "\2212";
+}
+
+.collapse-content {
+    padding: 0 18px;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+    background-color: red;
+    display: none;
+}
+
