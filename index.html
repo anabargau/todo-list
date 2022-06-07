@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="main.js" defer></script>
+    <title>ToDo-List</title>
+</head>
+<body>
+    <div id="content">
+        <header>To-Do-List</header>
+        <div class="sidenav">
+            <button id="add-new-project">+ New Project</button>
+            <label for="projects" class="projects-label">Your Projects</label>
+            <select name="projects" id="projects">
+            </select>
+        </div>
+        <div class="tasks-content" id="tasks-content">
+            <label for="sort-selector">Sort by: </label>
+            <select name="sort" id="sort-selector">
+                <option value="1">
+                    Due-Date low to high
+                </option>
+                <option value="2">
+                    Due-Date high to low
+                </option>
+                <option value="3">
+                    Priority low to high
+                </option>
+                <option value="4">Priority high to low</option>
+            </select>
+            <button id="add-new-task">+ New Task</button>
+            <div id="task-list"></div>
+        </div>
+    </div>
+</body>
+</html>
