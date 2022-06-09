@@ -4,31 +4,12 @@ import {compareAsc, format, fromUnixTime, sub} from 'date-fns'
 const Project = (name) => {
     let projectTasks = []
     
-    const getProjectName = () => {
-        return name
-    }   
-
-    return {getProjectName, projectTasks}
+    return {name, projectTasks}
 }
 
-const Task = (name, dueDate, priority, description, project) => {
-    const getTaskName = () => {
-        return name
-    }
-
-    const getTaskDueDate = () => {
-        return dueDate
-    }
-
-    const getTaskPriority = () => {
-        return priority
-    }
-
-    const getTaskDescription = () => {
-        return description
-    }
-
-    return {getTaskName, getTaskDueDate, getTaskPriority, getTaskDescription}
+const Task = (name, dueDate, priority, description, completed = false) => {
+ 
+    return {name, dueDate, priority, description, completed}
 }
 
 const toDoList = (() => {
@@ -40,9 +21,10 @@ const toDoList = (() => {
         let taskDescription = document.getElementById('description').value
         let taskProject = document.getElementById('select-project')
         let taskProjectValue = taskProject.options[taskProject.selectedIndex].value
-        let newTask = Task(taskName, dueDate, taskPriority, taskDescription, taskProject)
+        let newTask = Task(taskName, dueDate, taskPriority, taskDescription)
         let projectIndex = indexOfProject(taskProjectValue)
         projectsList[projectIndex].projectTasks.push(newTask)
+        updateStorage()
     }
 
     const addProjectToList = () => {
@@ -50,6 +32,7 @@ const toDoList = (() => {
         if(projectName) {
             let newProject = Project(projectName)
             projectsList.push(newProject)
+            updateStorage()
             manageDOM.addProjectToSelector(newProject)
         }
     } 
@@ -57,7 +40,7 @@ const toDoList = (() => {
     const indexOfProject = (projectName) => {
         let projectsListNames = []
         for(let i = 0; i < projectsList.length; i++){
-            projectsListNames.push(projectsList[i].getProjectName())
+            projectsListNames.push(projectsList[i].name)
         }
         let index = projectsListNames.indexOf(projectName)
         return index
@@ -65,32 +48,32 @@ const toDoList = (() => {
 
     const sortByPriorityLTH = (project) => {
         project.projectTasks.sort((a, b) => {
-            let priorityA = a.getTaskPriority()
-            let priorityB = b.getTaskPriority()
+            let priorityA = a.priority
+            let priorityB = b.priority
             return compare(priorityA, priorityB)
         })
     }
 
     const sortByPriorityHTL = (project) => {
         project.projectTasks.sort((a, b) => {
-            let priorityA = a.getTaskPriority()
-            let priorityB = b.getTaskPriority()
+            let priorityA = a.priority
+            let priorityB = b.priority
             return compare(priorityB, priorityA)  
         })
     }
 
     const sortByDateLTH = (project) => {
         project.projectTasks.sort((a, b) => {
-            let dateA = a.getTaskDueDate()
-            let dateB = b.getTaskDueDate()
+            let dateA = a.dueDate
+            let dateB = b.dueDate
             return compare(dateA, dateB) 
         })
     }
 
     const sortByDateHTL = (project) => {
         project.projectTasks.sort((a, b) => {
-            let dateA = a.getTaskDueDate()
-            let dateB = b.getTaskDueDate()
+            let dateA = a.dueDate
+            let dateB = b.dueDate
             return compare(dateB, dateA)
         })
     }
@@ -124,7 +107,60 @@ const toDoList = (() => {
         return 0
     }
 
-    return {addTaskToProject, addProjectToList, indexOfProject, sortByPriorityHTL, sortByPriorityLTH, sortTasks}
+    const deleteTask = (e, i) => {
+        let projectName = findCurrentProjectName()
+        let index = indexOfProject(projectName)
+        projectsList[index].projectTasks.splice(i, 1)
+        e.target.parentNode.parentNode.remove()
+        updateStorage()
+    }
+
+    const deleteProject = () => {
+        let project = findCurrentProjectName()
+        let index = indexOfProject(project)
+        projectsList.splice(index, 1)
+        updateStorage()
+    }
+
+    const findCurrentProjectName = () => {
+        let selector = document.getElementById('projects')
+        let projectName = selector.options[selector.selectedIndex].value 
+        return projectName
+    }
+
+    const checkTask = (i) => {
+        let project = findCurrentProjectName()
+        let index = indexOfProject(project)
+        let currentTask = projectsList[index].projectTasks[i]
+        if(currentTask.completed == true) {
+            currentTask.completed = false
+        } else {
+            currentTask.completed = true
+        }
+        updateStorage()
+    }
+
+    const updateStorage = () => {
+        localStorage.setItem('projectsList', JSON.stringify(projectsList))
+    }
+
+    const deleteCompleted = () => {
+        let project = findCurrentProjectName()
+        let index = indexOfProject(project)
+        let currentProject = projectsList[index]
+        let tasksArray = currentProject.projectTasks
+        console.log(currentProject)
+        for(let i = 0; i < tasksArray.length; i++) {
+            if(tasksArray[i].completed == true){
+                tasksArray.splice(i, 1)
+                i--
+            }
+        }
+        console.log(currentProject.projectTasks)
+        updateStorage()
+    }
+
+    return {addTaskToProject, addProjectToList, indexOfProject, sortByPriorityHTL, sortByPriorityLTH, sortTasks, deleteTask, deleteProject, checkTask, deleteCompleted}
 })()
 
 const manageDOM = (() => {
@@ -353,14 +389,65 @@ const manageDOM = (() => {
 
         let sortSelector = document.getElementById('sort-selector')
         sortSelector.addEventListener('change', displayTasksOfProject)
+
+        let delCompleted = document.getElementById('delete-completed')
+        delCompleted.addEventListener('click', () => {
+            toDoList.deleteCompleted()
+            displayTasksOfProject()
+        })
+    }
+
+    const setCheckboxListeners = () => {
+        let checkBox = document.getElementsByClassName('checkbox')
+        for(let i = 0; i < checkBox.length; i++) {
+            checkBox[i].addEventListener('click', (e) => {
+                toDoList.checkTask(i)
+                let parent = e.target.parentNode
+                parent.classList.toggle('completed')
+                displayTasksOfProject()
+            })
+        }
+    }
+
+    const setDelBtnListeners = () => {
+        let delTaskBtn = document.getElementsByClassName('delete-task')
+        for(let i = 0; i < delTaskBtn.length; i++) {
+            delTaskBtn[i].addEventListener('click', (e) => {
+                toDoList.deleteTask(e, i)
+                manageDOM.displayTasksOfProject()
+            })
+        }
+
+        let delProjectBtn = document.getElementById('delete-project')
+        delProjectBtn.addEventListener('click', () => {
+            toDoList.deleteProject()
+            initializeProjectSelector()
+            displayTasksOfProject()
+        })
+
+    }
+
+    const initializeProjectSelector = () => {
+        if(projectsList.length == 0) {
+            return
+        } else {
+            let projectSelector = document.getElementById('projects')
+            projectSelector.textContent = ''
+            for(let i = 0; i < projectsList.length; i++) {
+                let projectOption = document.createElement('option')
+                projectSelector.appendChild(projectOption)
+                projectOption.textContent = projectsList[i].name
+                projectOption.setAttribute('value', projectsList[i].name)
+            }
+        }
     }
 
     const addProjectToSelector = (project) => {
         let projectSelector = document.getElementById('projects')
         let newProjectOption = document.createElement('option')
         projectSelector.appendChild(newProjectOption)
-        newProjectOption.textContent = project.getProjectName()
-        newProjectOption.setAttribute('value', project.getProjectName())
+        newProjectOption.textContent = project.name
+        newProjectOption.setAttribute('value', project.name)
     }
 
    const addProjectOptions = (node) => {
@@ -368,7 +455,7 @@ const manageDOM = (() => {
        for(let i = 0; i < projectsList.length; i++) {
            let projectOption = document.createElement('option')
            node.appendChild(projectOption)
-           projectOption.textContent = projectsList[i].getProjectName()
+           projectOption.textContent = projectsList[i].name
            projectOption.setAttribute('value', projectOption.textContent)
        }
     }
@@ -389,25 +476,48 @@ const manageDOM = (() => {
             tasksContent.textContent = ''
             return
         }
+        generateTaskList(project)
+        makeCollapsibleContent()
+        setDelBtnListeners()
+        setCheckboxListeners()
+    } 
+
+    const generateTaskList = (project) => {
+        let tasksContent =  document.getElementById('task-list')
         for(let i = 0; i < project.projectTasks.length; i++) {
+
             let task = document.createElement('div')
             tasksContent.appendChild(task)
             task.classList.add('task')
+
+            let checkBox = document.createElement('input')
+            checkBox.setAttribute('type', 'checkbox')
+            task.appendChild(checkBox)
+            checkBox.classList.add('checkbox')
+            if(project.projectTasks[i].completed == true) {
+                checkBox.checked = true
+            }
             let taskText = document.createElement('div')
             task.appendChild(taskText)
             taskText.classList.add('task-text')
-            taskText.textContent = `${i + 1}. ${project.projectTasks[i].getTaskName()}, ${project.projectTasks[i].getTaskDueDate()}, ${project.projectTasks[i].getTaskPriority()}` 
+            taskText.textContent = `${i + 1}. ${project.projectTasks[i].name}, ${project.projectTasks[i].dueDate}, ${project.projectTasks[i].priority}` 
+
             let collapsibleBtn = document.createElement('button')
             taskText.appendChild(collapsibleBtn)
             collapsibleBtn.setAttribute('type', 'button')
             collapsibleBtn.classList.add('collapse')
+
+            let delBtn = document.createElement('button')
+            delBtn.setAttribute('type', 'button')
+            delBtn.classList.add('delete-task')
+            taskText.appendChild(delBtn)
+
             let collapsibleContent = document.createElement('div')
             task.appendChild(collapsibleContent)
-            collapsibleContent.textContent = project.projectTasks[i].getTaskDescription()
+            collapsibleContent.textContent = project.projectTasks[i].description
             collapsibleContent.classList.add('collapse-content')
         }
-        makeCollapsibleContent()
-    } 
+    }
 
     const makeCollapsibleContent = () => {
         let collapsible = document.getElementsByClassName('collapse')
@@ -426,16 +536,43 @@ const manageDOM = (() => {
 
     }
 
-    return {setEventListeners, addProjectToSelector}
+    return {setEventListeners, addProjectToSelector, initializeProjectSelector, displayTasksOfProject, setDelBtnListeners }
 })()
 
+
+let projectsList
+let serializedProjectsList
+
+if(!localStorage.getItem('projectsList')) {
+    projectsList = []
+} else {
+    serializedProjectsList = JSON.parse(localStorage.getItem('projectsList'))
+    projectsList = deserializeProjectsList(serializedProjectsList)
+}
+
+manageDOM.initializeProjectSelector()
+manageDOM.displayTasksOfProject()
 manageDOM.setEventListeners()
-let projectsList = []
-window.addEventListener('open', () => {
-    if(projectsList.length == 0) {
-        let addTaskBtn = document.getElementById('add-new-task')
-        addTaskBtn.disabled = tru
+manageDOM.setDelBtnListeners()
+
+function deserializeProjectsList(string)  {
+    let newArray = []
+    for(let i = 0; i < string.length; i++) {
+        let project = Project(string[i].name)
+        project.projectTasks = deserializeTasksList(string[i].projectTasks)
+        newArray.push(project)
     }
-    manageDOM.displayTasksOfProject
-})
+    return newArray
+}
+
+function deserializeTasksList(string) {
+    let newArray = []
+    for(let i = 0; i < string.length; i++) {
+        let task = Task(string[i].name, string[i].dueDate, string[i].priority, string[i].description, string[i].completed)
+        newArray.push(task)
+    }
+    return newArray
+}
+
+
 

@@ -101,3 +101,10 @@ header {
     display: none;
 }
 
+.delete-task:after {
+    content: "\1F5D1";
+}
+
+.task {
+    display: flex;
+}
