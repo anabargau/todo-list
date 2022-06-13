@@ -19,7 +19,7 @@
         <div class="tasks-content" id="tasks-content">
             <label for="sort-selector">Sort by: </label>
             <select name="sort" id="sort-selector">
-                <option value="1">
+                <option value="1" selected>
                     Due-Date low to high
                 </option>
                 <option value="2">
@@ -30,9 +30,11 @@
                 </option>
                 <option value="4">Priority high to low</option>
             </select>
-            <button id="add-new-task">+ New Task</button>
-            <button id="delete-project">Delete current project</button>
-            <button id="delete-completed">Delete completed</button>
+            <div class="control-buttons">
+                <button id="add-new-task">+ New Task</button>
+                <button id="delete-project">Delete current project</button>
+                <button id="delete-completed">Delete completed</button>
+            </div>
             <div id="task-list"></div>
         </div>
     </div>
