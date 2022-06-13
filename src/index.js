@@ -191,7 +191,7 @@ const manageDOM = (() => {
         let titleLabel = document.createElement('label')
         form.appendChild(titleLabel)
         titleLabel.setAttribute('for', 'title-input')
-        titleLabel.textContent = 'Title'
+        titleLabel.textContent = 'Title:'
 
         let titleInput = document.createElement('input')
         form.appendChild(titleInput)
@@ -203,7 +203,7 @@ const manageDOM = (() => {
         let dueDateLabel = document.createElement('label')
         form.appendChild(dueDateLabel)
         dueDateLabel.setAttribute('for', 'due-date')
-        dueDateLabel.textContent = 'Due Date'
+        dueDateLabel.textContent = 'Due Date:'
 
         let dueDate = document.createElement('input')
         form.appendChild(dueDate)
@@ -262,7 +262,7 @@ const manageDOM = (() => {
         let selectProjectLabel = document.createElement('label')
         form.appendChild(selectProjectLabel)
         selectProjectLabel.setAttribute('for', 'select-project')
-        selectProjectLabel.textContent = 'Select Project'
+        selectProjectLabel.textContent = 'Select Project:'
 
         let selectProject = document.createElement('select')
         selectProject.setAttribute('id', 'select-project')
@@ -272,7 +272,7 @@ const manageDOM = (() => {
 
         let descriptionLabel = document.createElement('label')
         descriptionLabel.setAttribute('for', 'description')
-        descriptionLabel.textContent = 'Description'
+        descriptionLabel.textContent = 'Description:'
         form.appendChild(descriptionLabel)
 
         let description = document.createElement('textarea')
@@ -334,7 +334,7 @@ const manageDOM = (() => {
         let submitProjectBtn = document.createElement('button')
         projectForm.appendChild(submitProjectBtn)
         submitProjectBtn.setAttribute('id', 'submit-project')
-        submitProjectBtn.setAttribute('type', 'submit')
+        submitProjectBtn.setAttribute('type', 'button')
         submitProjectBtn.textContent = 'Create Project'
     }
 
@@ -426,7 +426,7 @@ const manageDOM = (() => {
         }
     }
 
-    const setDelBtnListeners = () => {
+    const setDelTaskBtnListeners = () => {
         let delTaskBtn = document.getElementsByClassName('delete-task')
         for(let i = 0; i < delTaskBtn.length; i++) {
             delTaskBtn[i].addEventListener('click', (e) => {
@@ -434,7 +434,9 @@ const manageDOM = (() => {
                 displayTasksOfProject()
             })
         }
+    } 
 
+    const setDelProjectBtnListeners = () => {
         let delProjectBtn = document.getElementById('delete-project')
         delProjectBtn.addEventListener('click', () => {
             if(projectsList.length != 0){
@@ -443,7 +445,6 @@ const manageDOM = (() => {
                 displayTasksOfProject()
             }
         })
-
     }
 
     const initializeProjectSelector = () => {
@@ -495,7 +496,8 @@ const manageDOM = (() => {
         }
         generateTaskList(project)
         makeCollapsibleContent()
-        setDelBtnListeners
+        setDelProjectBtnListeners
+        setDelTaskBtnListeners()
         setCheckboxListeners()
     } 
 
@@ -516,9 +518,6 @@ const manageDOM = (() => {
             checkBox.setAttribute('type', 'checkbox')
             task.appendChild(checkBox)
             checkBox.classList.add('checkbox')
-            if(project.projectTasks[i].completed == true) {
-                checkBox.checked = true
-            }
            
             let taskText = document.createElement('div')
             task.appendChild(taskText)
@@ -527,7 +526,11 @@ const manageDOM = (() => {
             let taskName = document.createElement('div')
             taskText.appendChild(taskName)
             taskName.classList.add('task-name')
-            taskName.textContent = `${project.projectTasks[i].name}` 
+            taskName.textContent = `${project.projectTasks[i].name}`
+            if(project.projectTasks[i].completed == true) {
+                checkBox.checked = true
+                taskName.style.textDecoration = 'line-through'
+            }
 
             let dueDate = document.createElement('div')
             dueDate.classList.add('due-date')
@@ -578,7 +581,7 @@ const manageDOM = (() => {
         }
     }
 
-    return {setEventListeners, addProjectToSelector, initializeProjectSelector, displayTasksOfProject, setDelBtnListeners, disableAddButtons}
+    return {setEventListeners, addProjectToSelector, initializeProjectSelector, displayTasksOfProject, setDelProjectBtnListeners, setDelTaskBtnListeners, disableAddButtons}
 })()
 
 
@@ -596,7 +599,8 @@ manageDOM.initializeProjectSelector()
 manageDOM.disableAddButtons()
 manageDOM.displayTasksOfProject()
 manageDOM.setEventListeners()
-manageDOM.setDelBtnListeners()
+manageDOM.setDelProjectBtnListeners()
+manageDOM.setDelTaskBtnListeners()
 
 function deserializeProjectsList(string)  {
     let newArray = []
