@@ -21,6 +21,9 @@ const toDoList = (() => {
         let taskDescription = document.getElementById('description').value
         let taskProject = document.getElementById('select-project')
         let taskProjectValue = taskProject.options[taskProject.selectedIndex].value
+        if(taskName == '' || dueDate == '') {
+            return
+        }
         let newTask = Task(taskName, dueDate, taskPriority, taskDescription)
         let projectIndex = indexOfProject(taskProjectValue)
         projectsList[projectIndex].projectTasks.push(newTask)
@@ -34,6 +37,8 @@ const toDoList = (() => {
             projectsList.push(newProject)
             updateStorage()
             manageDOM.addProjectToSelector(newProject)
+        } else {
+            return
         }
     } 
 
