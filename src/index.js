@@ -22,6 +22,7 @@ const toDoList = (() => {
         let taskProject = document.getElementById('select-project')
         let taskProjectValue = taskProject.options[taskProject.selectedIndex].value
         if(taskName == '' || dueDate == '') {
+            alert('You need to enter a task name and due date!')
             return
         }
         let newTask = Task(taskName, dueDate, taskPriority, taskDescription)
@@ -38,6 +39,7 @@ const toDoList = (() => {
             updateStorage()
             manageDOM.addProjectToSelector(newProject)
         } else {
+            alert('You need to enter a project name!')
             return
         }
     } 
